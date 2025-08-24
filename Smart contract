@@ -1,0 +1,36 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+/**
+ * @title Nextolito Token (NXT)
+ * @dev An ERC20 token with mint, burn, and airdrop functionalities.
+ */
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract NextolitoToken is ERC20, Ownable {
+    uint256 public constant MAX_SUPPLY = 1_000_000 * 10**18;
+
+    constructor() ERC20("NextolitoToken", "NXT") Ownable(msg.sender) {
+        _mint(msg.sender, 1_000_000 * 10**18); // Mint total supply to deployer
+    }
+
+    /// @notice Mint new tokens (only owner)
+    function mint(address to, uint256 amount) external onlyOwner {
+        require(totalSupply() + amount <= MAX_SUPPLY, "Exceeds max supply");
+        _mint(to, amount);
+    }
+
+    /// @notice Burn tokens from caller’s balance
+    function burn(uint256 amount) external {
+        _burn(msg.sender, amount);
+    }
+
+    /// @notice Airdrop tokens to multiple addresses
+    function airdrop(address[] calldata recipients, uint256 amount) external onlyOwner {
+        for (uint256 i = 0; i < recipients.length; i++) {
+            require(totalSupply() + amount <= MAX_SUPPLY, "Exceeds max supply");
+            _mint(recipients[i], amount);
+        }
+    }
+}
